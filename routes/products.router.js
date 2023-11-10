@@ -1,61 +1,49 @@
 const express = require("express");
-const { faker } = require("@faker-js/faker");
+const ProductServices = require("./../services/product.service");
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  const products = [];
-  const { size } = req.query;
-  const limit = parseInt(size, 10) || 100;
-  for (let i = 0; i < limit; i++) {
-    products.push({
-      name: faker.commerce.productName(),
-      price: parseInt(faker.number.int(), 10),
-      Image: faker.image.url(),
-    });
-  }
+const service = new ProductServices();
+
+router.get("/", async (req, res) => {
+  const products = await service.find();
   res.json(products);
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const body = req.body;
-  res.json({
-    message: "created successfully",
-    data: body,
-  });
+  const newProduct = await service.create(body);
+  res.status(201).json(newProduct);
 });
 
-router.patch("/:id", (req, res) => {
-  const { id } = req.params;
-  const body = req.body;
-  res.json({
-    message: "updated successfully",
-    data: body,
-    id,
-  });
+router.patch("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+    const product = await service.update(id, body);
+    res.json(product);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-  res.json({
-    message: "Product deleted successfully",
-    id,
-  });
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const rst = await service.delete(id);
+    res.json(rst);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.get("/:id", (req, res) => {
-  const { id } = req.params;
-  console.log(id);
-  if (id === "999") {
-    res.status(404).json({
-      message: "Product not found",
-    });
-  } else {
-    res.status(200).json({
-      id,
-      name: `Product ${id}`,
-      price: 1000,
-    });
+router.get("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await service.findOne(id);
+    res.json(product);
+  } catch (error) {
+    next(error);
   }
 });
 

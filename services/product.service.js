@@ -8,7 +8,7 @@ class ProductServices {
   }
 
   generate() {
-    const limit = 5;
+    const limit = 100;
     for (let i = 0; i < limit; i++) {
       this.products.push({
         id: faker.string.uuid(),
@@ -32,7 +32,7 @@ class ProductServices {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve(this.products);
-      }, 5000);
+      }, 1000);
     });
   }
 
